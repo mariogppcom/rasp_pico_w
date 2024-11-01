@@ -1,0 +1,134 @@
+Esquema de conexão
+https://capsistema.com.br/index.php/2022/06/08/modulo-leitor-rfid-rc522-com-raspberry-pi-pico/
+
+esphome:
+  name: pico-w
+  friendly_name: Pico W
+
+rp2040:
+  board: rpipicow
+  framework:
+    # Required until https://github.com/platformio/platform-raspberrypi/pull/36 is merged
+    platform_version: https://github.com/maxgerhardt/platform-raspberrypi.git
+
+# Enable logging
+logger:
+
+time:
+  - platform: homeassistant
+    id: esptime
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "xxxxx"
+
+ota:
+  - platform: esphome
+    password: "xxx"
+
+wifi:
+  networks:
+  - ssid: ssid1
+    password: pass1
+  - ssid: ssid2
+    password: pass2
+  - ssid: ssid3
+    password: pass3
+  # Set up a wifi access point
+  ap:
+    ssid: "WIFI_PICO_W"
+    password: "pass_for_wifi_emergency"
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi PICOW"
+    update_interval: 60s
+
+spi:
+  clk_pin: GPIO2
+  mosi_pin: GPIO3
+  miso_pin: GPIO4
+
+rc522_spi:
+  cs_pin: GPIO1
+  reset_pin: GPIO0
+
+binary_sensor:
+  - platform: rc522
+    uid: 57-0D-FE-00
+    name: "TAG Recepcao"
+
+# For led experiments
+# switch:
+#   - platform: gpio
+#     name: "led amarelo"
+#     pin: 0
+
+#   - platform: gpio
+#     name: "led VERDE"
+#     pin: 1
+
+#   - platform: gpio
+#     name: "led vermelho"
+#     pin: 2
+
+
+# sensor de presenca que funciona
+# binary_sensor:  
+#   - platform: homeassistant
+#     id: sensor_teste
+#     entity_id: binary_sensor.sensor_teste_contact
+#     internal: true
+#   - platform: gpio
+#     name: pir_teste
+#     device_class: motion
+#     pin:
+#       number: 16
+#       mode:
+#         input: true
+#         pullup: true
+
+# tudo display abaixo funciona
+# text_sensor:
+#     - platform: homeassistant
+#       id: sensor_simples
+#       entity_id: sensor.sensor_simples_temperature
+#       internal: true
+# i2c:
+#   sda: 4
+#   scl: 5
+
+# display:
+#   - platform: ssd1306_i2c
+#     id: lcd_display
+#     model: "SSD1306 128x64"
+#     address: 0x3C
+#     pages: 
+#       - id: page1
+#         lambda: |-
+#           if (id(sensor_teste).state){
+#           it.printf(10, 10, id(font_12), TextAlign::LEFT, "Teste: Fechado");
+#           } else {
+#           it.printf(10, 10, id(font_12), TextAlign::LEFT, "Teste: Aberto");
+#           }
+#           it.strftime(10, 30, id(font_8), TextAlign::LEFT, "%X - %x", id(esptime).now());
+#       - id: page2
+#         lambda: |-
+#           it.printf(10, 10, id(font_12), TextAlign::LEFT, "Temp: %s", id(sensor_simples).state.c_str());
+#           it.strftime(10, 30, id(font_8), TextAlign::LEFT, "%X - %x", id(esptime).now());
+
+# interval:
+#   - interval: 10s
+#     then:
+#       - display.page.show_next: lcd_display
+#       - component.update: lcd_display
+
+# font:
+#   - file: 'fonts/OpenSans-Medium.ttf'
+#     id: font_12
+#     size: 12
+
+#   - file: 'fonts/OpenSans-Medium.ttf'
+#     id: font_8
+#     size: 8
